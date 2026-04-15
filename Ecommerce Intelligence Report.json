@@ -1,0 +1,353 @@
+{
+  "name": "Ecommerce Intelligence Report",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json || {};\nconst urls = body.urls || [\n  \"https://www.allbirds.com\",\n  \"https://www.gymshark.com\",\n  \"https://www.brooklinen.com\",\n  \"https://www.beardbrand.com\",\n  \"https://www.puravidabracelets.com\",\n  \"https://www.chubbiesshorts.com\",\n  \"https://www.shinesty.com\",\n  \"https://www.kettleandfire.com\",\n  \"https://www.mudwtr.com\",\n  \"https://www.graza.co\",\n  \"https://www.olipop.com\",\n  \"https://www.jonesroadbeauty.com\",\n  \"https://www.halfdays.com\",\n  \"https://www.goodr.com\",\n  \"https://www.bombas.com\",\n  \"https://www.ruggable.com\",\n  \"https://www.studs.com\",\n  \"https://www.fishwifetinnedfishco.com\",\n  \"https://www.hexclad.com\",\n  \"https://www.skullcandy.com\"\n];\n\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "33a53d63-b8e5-41ed-b6bb-ffcbf212cbe1",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "executeOnce": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "=en-US,en;q=0.5"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        -48
+      ],
+      "id": "d2bb35de-0540-4a5e-a3af-85b85347c65e",
+      "name": "HTTP Request",
+      "executeOnce": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = $input.item.json.data || $input.item.json.body || '';\nconst url = $('Code in JavaScript').item.json.url || '';\n\nconst detect = (pattern) => pattern.test(html);\n\nreturn {\n  url: url,\n  platform: detect(/cdn\\.shopify\\.com/i) ? 'Shopify' :\n            detect(/woocommerce/i) ? 'WooCommerce' :\n            detect(/bigcommerce/i) ? 'BigCommerce' :\n            detect(/magento/i) ? 'Magento' : 'Unknown',\n  hasKlaviyo: detect(/klaviyo/i),\n  hasGoogleAnalytics: detect(/google-analytics|gtag/i),\n  hasFacebookPixel: detect(/fbq\\(|facebook\\.net\\/en_US\\/fbevents/i),\n  hasGoogleTagManager: detect(/googletagmanager/i),\n  hasYotpo: detect(/yotpo/i),\n  hasAttentive: detect(/attentivemobile/i),\n  hasPostscript: detect(/postscript/i),\n  hasRecharge: detect(/recharge/i),\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "6f63b666-9318-4f91-8738-29be92b81c42",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/16uiOkRZeaZqrz2AWN1EQtsve3xfm94PdP4mBtI8zX3k/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ $json.url }}",
+            "Platform": "={{ $json.platform }}",
+            "Klaviyo": "={{ $json.hasKlaviyo }}",
+            "GoogleAnalytics": "={{ $json.hasGoogleAnalytics }}",
+            "FacebookPixel": "={{ $json.hasFacebookPixel }}",
+            "GoogleTagManager": "={{ $json.hasGoogleTagManager }}",
+            "Yotpo": "={{ $json.hasYotpo }}",
+            "Attentive": "={{ $json.hasAttentive }}",
+            "Postscript": "={{ $json.hasPostscript }}",
+            "Recharge": "={{ $json.hasRecharge }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Klaviyo",
+              "displayName": "Klaviyo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "GoogleAnalytics",
+              "displayName": "GoogleAnalytics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FacebookPixel",
+              "displayName": "FacebookPixel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "GoogleTagManager",
+              "displayName": "GoogleTagManager",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Yotpo",
+              "displayName": "Yotpo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Attentive",
+              "displayName": "Attentive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Postscript",
+              "displayName": "Postscript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recharge",
+              "displayName": "Recharge",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "60e3ffcc-c33b-4d63-9137-279611d4fc93",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "h5PN8dF6Fhs3glQp",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $('Code in JavaScript').item.json.url || '';\n\nreturn {\n  url: url,\n  platform: 'Error - Could not fetch',\n  hasKlaviyo: 'N/A',\n  hasGoogleAnalytics: 'N/A',\n  hasFacebookPixel: 'N/A',\n  hasGoogleTagManager: 'N/A',\n  hasYotpo: 'N/A',\n  hasAttentive: 'N/A',\n  hasPostscript: 'N/A',\n  hasRecharge: 'N/A',\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        96
+      ],
+      "id": "ef7ce7eb-431e-42b2-b401-bb7c3779f591",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ecommerce-intel",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "34a68363-0bf7-42f7-81e2-ced0842ed07b",
+      "name": "Webhook",
+      "webhookId": "dbbf5369-c334-416b-8c6f-8c38e72eb998"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "d2312e89-f5f8-4fff-8b93-733dae5b1f5b",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "148e138b-06dd-476b-b0bb-1da57db9b634",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "729926c24baf2f81a1a0283811bad74023f541fb5f9eface7b325fd67f489708"
+  },
+  "id": "938eV8BOrrbcGe9z",
+  "tags": []
+}
