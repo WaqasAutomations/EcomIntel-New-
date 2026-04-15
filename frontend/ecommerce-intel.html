@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcomIntel — Ecommerce Intelligence Scanner</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* DARK MODE VARIABLES */
+[data-theme="dark"]{
+  --bg:#0a0e1a;
+  --bg2:#0f1420;
+  --bg3:#141928;
+  --border:#1e2740;
+  --border2:#2d3748;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --text4:#4a5568;
+  --input-bg:#141928;
+  --card-bg:#0f1420;
+  --tool-bg:#141928;
+  --placeholder:#2d3748;
+}
+
+/* LIGHT MODE VARIABLES */
+[data-theme="light"]{
+  --bg:#f0f4f8;
+  --bg2:#ffffff;
+  --bg3:#f8fafc;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --text:#0f172a;
+  --text2:#334155;
+  --text3:#64748b;
+  --text4:#94a3b8;
+  --input-bg:#f8fafc;
+  --card-bg:#ffffff;
+  --tool-bg:#f1f5f9;
+  --placeholder:#cbd5e1;
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.2s,color 0.2s}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-text{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.logo-text span{color:#3b82f6}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.badge-live{background:#0d2e1a;border:1px solid #10b981;color:#10b981;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.status-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text4)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;flex-shrink:0}
+
+/* THEME TOGGLE */
+.theme-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 8px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.theme-toggle:hover{border-color:var(--border2)}
+
+/* MAIN CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:20px}
+
+/* INPUT SECTION */
+.input-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.input-section h2{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px}
+.input-row{display:grid;grid-template-columns:1fr 220px;gap:16px;align-items:start}
+textarea{width:100%;height:120px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;font-family:monospace;color:var(--text2);resize:vertical;outline:none;line-height:1.6;transition:border 0.2s}
+textarea:focus{border-color:#3b82f6}
+textarea::placeholder{color:var(--placeholder)}
+.url-count{font-size:11px;color:var(--text4);margin-top:6px;text-align:right}
+.btn-group{display:flex;flex-direction:column;gap:8px}
+.btn{border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{background:#93c5fd;color:#fff;cursor:not-allowed}
+[data-theme="dark"] .btn-primary:disabled{background:#1e3a5f;color:#4a5568}
+.btn-secondary{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--tool-bg);color:var(--text2)}
+.btn-demo{background:var(--bg3);color:#6366f1;border:1px solid var(--border2)}
+.btn-demo:hover{border-color:#6366f1}
+.status-msg{font-size:12px;color:var(--text4);min-height:18px;text-align:center;margin-top:4px}
+.status-msg.running{color:#3b82f6}
+.status-msg.done{color:#10b981}
+.status-msg.error{color:#ef4444}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:#3b82f6;border-radius:2px;transition:width 0.3s;width:0%}
+
+/* SUMMARY GRID */
+.summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.metric-val{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.metric-label{font-size:10px;color:var(--text4);margin-top:4px}
+.metric.blue .metric-val{color:#3b82f6}
+.metric.green .metric-val{color:#10b981}
+.metric.purple .metric-val{color:#8b5cf6}
+.metric.amber .metric-val{color:#f59e0b}
+
+/* RESULTS */
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.results-header h2{font-size:14px;font-weight:600;color:var(--text2)}
+.store-count{font-size:12px;color:var(--text4)}
+.store-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;transition:border-color 0.2s}
+.store-card:hover{border-color:var(--border2)}
+.store-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.store-info{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.store-favicon{width:34px;height:34px;border-radius:8px;background:var(--tool-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#3b82f6;flex-shrink:0}
+.store-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-url{font-size:11px;color:var(--text4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.platform-badge{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.platform-shopify{background:#0d2e1a;border:1px solid #10b981;color:#10b981}
+[data-theme="light"] .platform-shopify{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.platform-woo{background:#0d1f3c;border:1px solid #3b82f6;color:#3b82f6}
+[data-theme="light"] .platform-woo{background:#dbeafe;border-color:#2563eb;color:#1d4ed8}
+.platform-unknown{background:#1a1a2e;border:1px solid #4a5568;color:#4a5568}
+[data-theme="light"] .platform-unknown{background:#f1f5f9;border-color:#94a3b8;color:#64748b}
+.platform-error{background:#2e0d0d;border:1px solid #ef4444;color:#ef4444}
+[data-theme="light"] .platform-error{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.status-badge{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#0d2e1a;border:1px solid #10b981;color:#10b981}
+[data-theme="light"] .status-badge{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.status-badge.error{background:#2e0d0d;border-color:#ef4444;color:#ef4444}
+[data-theme="light"] .status-badge.error{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.tools-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.tool-section{background:var(--tool-bg);border-radius:8px;padding:10px}
+.tool-section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px}
+.tool-item{display:flex;align-items:center;justify-content:space-between;padding:3px 0}
+.tool-name{font-size:11px;color:var(--text3)}
+.tool-check{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.tool-check.yes{background:#0d2e1a;color:#10b981}
+[data-theme="light"] .tool-check.yes{background:#dcfce7;color:#15803d}
+.tool-check.no{background:var(--border);color:var(--text4)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text4)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-state h3{font-size:15px;color:var(--text3);margin-bottom:6px}
+.empty-state p{font-size:13px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .summary-grid{grid-template-columns:repeat(3,1fr)}
+  .tools-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:650px){
+  .input-row{grid-template-columns:1fr}
+  .btn-group{flex-direction:row;flex-wrap:wrap}
+  .btn{width:auto;flex:1;min-width:120px}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .tools-grid{grid-template-columns:repeat(2,1fr)}
+  .container{padding:12px}
+}
+@media(max-width:420px){
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .tools-grid{grid-template-columns:1fr 1fr}
+  .store-header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">Ecom<span>Intel</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-row"><div class="status-dot"></div><span>API Connected</span></div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    <div class="badge-live">● API LIVE</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="input-section">
+    <h2>🔍 Target URLs — Enter store URLs to analyze</h2>
+    <div class="input-row">
+      <div>
+        <textarea id="urlInput" placeholder="https://www.allbirds.com&#10;https://www.gymshark.com&#10;https://www.hexclad.com&#10;&#10;One URL per line..."></textarea>
+        <div class="url-count" id="urlCount">0 URLs</div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="runBtn" onclick="runAnalysis()">⚡ Run Analysis</button>
+        <button class="btn btn-demo" onclick="loadDemo()">Load Demo (20 stores)</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+        <div class="status-msg" id="statusMsg"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="metric"><div class="metric-val" id="m-total">0</div><div class="metric-label">Stores analyzed</div></div>
+    <div class="metric blue"><div class="metric-val" id="m-success">0</div><div class="metric-label">Successful</div></div>
+    <div class="metric green"><div class="metric-val" id="m-shopify">0</div><div class="metric-label">On Shopify</div></div>
+    <div class="metric purple"><div class="metric-val" id="m-email">0</div><div class="metric-label">Email tools</div></div>
+    <div class="metric amber"><div class="metric-val" id="m-sms">0</div><div class="metric-label">SMS tools</div></div>
+    <div class="metric"><div class="metric-val" id="m-avg">0</div><div class="metric-label">Avg tools/store</div></div>
+  </div>
+
+  <div class="results-header">
+    <h2>Intelligence Reports</h2>
+    <span class="store-count" id="storeCount"></span>
+  </div>
+
+  <div id="resultsContainer">
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No analysis yet</h3>
+      <p>Enter store URLs above and click Run Analysis to begin</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://n8n-production-de5a3.up.railway.app/webhook/ecommerce-intel';
+const DEMO_URLS = [
+  'https://www.allbirds.com','https://www.gymshark.com','https://www.brooklinen.com',
+  'https://www.beardbrand.com','https://www.puravidabracelets.com','https://www.chubbiesshorts.com',
+  'https://www.shinesty.com','https://www.kettleandfire.com','https://www.mudwtr.com',
+  'https://www.graza.co','https://www.olipop.com','https://www.jonesroadbeauty.com',
+  'https://www.halfdays.com','https://www.goodr.com','https://www.bombas.com',
+  'https://www.ruggable.com','https://www.studs.com','https://www.fishwifetinnedfishco.com',
+  'https://www.hexclad.com','https://www.skullcandy.com'
+];
+
+let currentTheme = 'dark';
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  document.getElementById('themeBtn').textContent = currentTheme === 'dark' ? '🌙 Dark' : '☀️ Light';
+}
+
+const urlInput = document.getElementById('urlInput');
+urlInput.addEventListener('input', updateCount);
+
+function updateCount() {
+  const urls = getUrls();
+  document.getElementById('urlCount').textContent = urls.length + ' URL' + (urls.length !== 1 ? 's' : '');
+}
+
+function getUrls() {
+  return urlInput.value.split('\n').map(u => u.trim().toLowerCase()).filter(u => u.startsWith('http'));
+}
+
+function loadDemo() {
+  urlInput.value = DEMO_URLS.join('\n');
+  updateCount();
+}
+
+function clearAll() {
+  urlInput.value = '';
+  updateCount();
+  document.getElementById('resultsContainer').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><h3>No analysis yet</h3><p>Enter store URLs above and click Run Analysis to begin</p></div>`;
+  resetMetrics();
+}
+
+function resetMetrics() {
+  ['m-total','m-success','m-shopify','m-email','m-sms','m-avg'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('storeCount').textContent = '';
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.innerHTML = msg;
+  el.className = 'status-msg ' + (type || '');
+}
+
+function setProgress(pct) {
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function runAnalysis() {
+  const urls = getUrls();
+  if (!urls.length) { setStatus('Please enter at least one URL', 'error'); return; }
+
+  document.getElementById('runBtn').disabled = true;
+  setStatus('<span class="spinner"></span> Scanning ' + urls.length + ' stores...', 'running');
+  setProgress(20);
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls })
+    });
+
+    setProgress(70);
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    const data = await res.json();
+    const rows = Array.isArray(data) ? data : [data];
+    setProgress(100);
+    renderResults(rows);
+    setStatus('✓ Analysis complete — ' + rows.length + ' stores scanned', 'done');
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+    setProgress(0);
+  }
+
+  document.getElementById('runBtn').disabled = false;
+}
+
+function renderResults(rows) {
+  let shopify = 0, success = 0, email = 0, sms = 0, totalTools = 0;
+  const container = document.getElementById('resultsContainer');
+  container.innerHTML = '';
+
+  rows.forEach(row => {
+    const r = row.json || row;
+    const url = r.url || r.URL || '';
+    const platform = r.platform || r.Platform || '';
+    const hasKlaviyo = toBool(r.hasKlaviyo ?? r.Klaviyo);
+    const hasGA = toBool(r.hasGoogleAnalytics ?? r.GoogleAnalytics);
+    const hasFB = toBool(r.hasFacebookPixel ?? r.FacebookPixel);
+    const hasGTM = toBool(r.hasGoogleTagManager ?? r.GoogleTagManager);
+    const hasYotpo = toBool(r.hasYotpo ?? r.Yotpo);
+    const hasAttentive = toBool(r.hasAttentive ?? r.Attentive);
+    const hasPostscript = toBool(r.hasPostscript ?? r.Postscript);
+    const hasRecharge = toBool(r.hasRecharge ?? r.Recharge);
+
+    const isError = platform.includes('Error');
+    if (!isError) success++;
+    if (platform === 'Shopify') shopify++;
+    if (hasKlaviyo) email++;
+    if (hasAttentive || hasPostscript) sms++;
+
+    const toolCount = [hasKlaviyo,hasGA,hasFB,hasGTM,hasYotpo,hasAttentive,hasPostscript,hasRecharge].filter(Boolean).length;
+    totalTools += toolCount;
+
+    const domain = url.replace(/https?:\/\//i,'').replace('www.','').split('/')[0];
+    const initials = domain.substring(0,2).toUpperCase();
+
+    const card = document.createElement('div');
+    card.className = 'store-card';
+    card.innerHTML = `
+      <div class="store-header">
+        <div class="store-info">
+          <div class="store-favicon">${initials}</div>
+          <div style="min-width:0">
+            <div class="store-name">${domain}</div>
+            <div class="store-url">${url}</div>
+          </div>
+        </div>
+        <div class="store-badges">
+          <span class="platform-badge ${getPlatformClass(platform)}">${platform||'Unknown'}</span>
+          <span class="status-badge ${isError?'error':''}">${isError?'✕ Error':'✓ OK'}</span>
+        </div>
+      </div>
+      <div class="tools-grid">
+        <div class="tool-section">
+          <div class="tool-section-title" style="color:#3b82f6">Email Marketing</div>
+          <div class="tool-item"><span class="tool-name">Klaviyo</span><span class="tool-check ${hasKlaviyo?'yes':'no'}">${hasKlaviyo?'✓':'✕'}</span></div>
+        </div>
+        <div class="tool-section">
+          <div class="tool-section-title" style="color:#8b5cf6">SMS Marketing</div>
+          <div class="tool-item"><span class="tool-name">Attentive</span><span class="tool-check ${hasAttentive?'yes':'no'}">${hasAttentive?'✓':'✕'}</span></div>
+          <div class="tool-item"><span class="tool-name">Postscript</span><span class="tool-check ${hasPostscript?'yes':'no'}">${hasPostscript?'✓':'✕'}</span></div>
+        </div>
+        <div class="tool-section">
+          <div class="tool-section-title" style="color:#f59e0b">Analytics</div>
+          <div class="tool-item"><span class="tool-name">Google Analytics</span><span class="tool-check ${hasGA?'yes':'no'}">${hasGA?'✓':'✕'}</span></div>
+          <div class="tool-item"><span class="tool-name">GTM</span><span class="tool-check ${hasGTM?'yes':'no'}">${hasGTM?'✓':'✕'}</span></div>
+          <div class="tool-item"><span class="tool-name">FB Pixel</span><span class="tool-check ${hasFB?'yes':'no'}">${hasFB?'✓':'✕'}</span></div>
+        </div>
+        <div class="tool-section">
+          <div class="tool-section-title" style="color:#ec4899">Reviews</div>
+          <div class="tool-item"><span class="tool-name">Yotpo</span><span class="tool-check ${hasYotpo?'yes':'no'}">${hasYotpo?'✓':'✕'}</span></div>
+        </div>
+        <div class="tool-section">
+          <div class="tool-section-title" style="color:#06b6d4">Subscriptions</div>
+          <div class="tool-item"><span class="tool-name">Recharge</span><span class="tool-check ${hasRecharge?'yes':'no'}">${hasRecharge?'✓':'✕'}</span></div>
+        </div>
+        <div class="tool-section">
+          <div class="tool-section-title">Tools detected</div>
+          <div style="font-size:22px;font-weight:700;color:var(--text);padding-top:4px">${toolCount}</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  document.getElementById('m-total').textContent = rows.length;
+  document.getElementById('m-success').textContent = success;
+  document.getElementById('m-shopify').textContent = shopify;
+  document.getElementById('m-email').textContent = email;
+  document.getElementById('m-sms').textContent = sms;
+  document.getElementById('m-avg').textContent = rows.length ? (totalTools/rows.length).toFixed(1) : '0';
+  document.getElementById('storeCount').textContent = rows.length + ' store' + (rows.length!==1?'s':'');
+}
+
+function toBool(val) {
+  return val===true||val==='true'||val==='TRUE';
+}
+
+function getPlatformClass(p) {
+  if(!p||p==='Unknown') return 'platform-unknown';
+  if(p.includes('Error')) return 'platform-error';
+  if(p==='Shopify') return 'platform-shopify';
+  if(p==='WooCommerce') return 'platform-woo';
+  return 'platform-unknown';
+}
+
+updateCount();
+</script>
+</body>
+</html>
